@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docházka a Vyúčtování (Marty & Maru)</title>
+<style>
+    body {
+        margin:0; padding:0;
+        font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: #f5f5f5;
+    }
+    header {
+        background: #333; color:#fff; padding:1rem; text-align:center;
+    }
+    main {
+        max-width: 1200px; margin: 2rem auto; background:#fff; padding:2rem; box-shadow:0 2px 10px rgba(0,0,0,0.1);
+    }
+    h2, h3 {
+        margin-top:0;
+    }
+    .form-row {
+        display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;
+    }
+    .form-row label {
+        display:flex; flex-direction:column; font-weight:600;
+    }
+    input, select, button {
+        padding:0.4rem; font-size:1rem; border:1px solid #ccc; border-radius:4px;
+    }
+    button {
+        background:#007aff; color:#fff; border:none; cursor:pointer;
+    }
+    button:hover {
+        background:#0057c2;
+    }
+    table {
+        width:100%; border-collapse:collapse; margin-bottom:1rem;
+    }
+    table th, table td {
+        border-bottom:1px solid #ddd; padding:0.4rem; text-align:left;
+    }
+    table th {
+        background:#eee;
+    }
+    .no-data {
+        text-align:center; color:#999;
+    }
+    .totals {
+        font-weight:bold; background:#e1f5fe;
+    }
+    .status {
+        margin:1rem 0; color:#333; font-size:0.9rem;
+    }
+    .controls {
+        margin-bottom:1.5rem;
+    }
+    @media(max-width:600px) {
+        .form-row {flex-direction:column;}
+    }
+</style>
+</head>
+<body>
+    <header><h1>Docházka a Vyúčtování</h1></header>
+    <main>
+        <div class="controls">
+            <h2>Nastavení období</h2>
+            <div class="form-row">
+                <label>Období (např. 12/2024): 
+                    <input type="text" id="period" placeholder="např. 12/2024" value="">
+                </label>
+                <button id="saveSettingsBtn">Uložit období</button>
+            </div>
+            <div class="status" id="settingsStatus"></div>
+        </div>
+
+        <h2>Záznamy</h2>
+        <p>Zadejte pro každý den: zaměstnance, datum, časy, minuty.  
+        Wellness a Více-práce se přičítají, pauza se odečítá.  
+        Z výdělku se platí šéfovi (Marty 50%, Maru 1/3), zbyde čistý výdělek.  
+        Čistý výdělek se pak odečte od přijatých Kč spolu s platbami a výplatou.</p>
+        
+        <div class="form-row">
+            <label>Zaměstnanec:
+                <select id="employeeSelect">
+                    <option value="Marty">Marty</option>
+                    <option value="Maru">Maru</option>
+                </select>
+            </label>
+            <label>Datum (dd.mm.rrrr):
+                <input type="text" id="entryDate" placeholder="např. 10.12.2024">
+            </label>
+            <label>Příchod (hh:mm):
+                <input type="text" id="arrivalTime" placeholder="11:00">
+            </label>
+            <label>Odchod (hh:mm):
+                <input type="text" id="departureTime" placeholder="15:30">
+            </label>
+        </div>
+        <div class="form-row">
+            <label>Pauza (min):
+                <input type="number" id="breakMin" value="0">
+            </label>
+            <label>Wellness (min):
+                <input type="number" id="wellnessMin" value="0">
+            </label>
+            <label>Více-práce (min):
+                <input type="number" id="overtimeMin" value="0">
+            </label>
+            <label>Původ:
+                <input type="text" id="origin" placeholder="Např. David">
+            </label>
+        </div>
+        <div class="form-row">
+            <label>Přijato Kč:
+                <input type="number" id="receivedCZK" value="0">
+            </label>
+            <label>Přijato EUR:
+                <input type="number" id="receivedEUR" value="0">
+            </label>
+            <label>Účel:
+                <input type="text" id="purpose" placeholder="Např. Železářství">
+            </label>
+            <label>Platby (Kč):
+                <input type="number" id="paymentsCZK" value="0">
+            </label>
+            <label>Výplata (Kč):
+                <input type="number" id="payoutCZK" value="0">
+            </label>
+            <button id="addEntryBtn">Přidat záznam</button>
+        </div>
+        <div class="status" id="entryStatus"></div>
+
+        <h3>Přehled záznamů</h3>
+        <div class="form-row">
+            <label>Filtrovat od (dd.mm.rrrr):
+                <input type="text" id="filterFrom" placeholder="1.12.2024">
+            </label>
+            <label>Do (dd.mm.rrrr):
+                <input type="text" id="filterTo" placeholder="31.12.2024">
+            </label>
+            <button id="filterBtn">Filtrovat</button>
+        </div>
+        
+        <table id="entriesTable">
+            <thead>
+                <tr>
+                    <th>Zaměstnanec</th>
+                    <th>Datum</th>
+                    <th>Příchod</th>
+                    <th>Odchod</th>
+                    <th>Pauza</th>
+                    <th>Wellness</th>
+                    <th>Více-práce</th>
+                    <th>Prac. doba</th>
+                    <th>Den. výdělek</th>
+                    <th>Původ</th>
+                    <th>Přijato Kč</th>
+                    <th>Přijato €</th>
+                    <th>Účel</th>
+                    <th>Platby (Kč)</th>
+                    <th>Výplata (Kč)</th>
+                    <th>Akce</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="16" class="no-data">Žádné záznamy</td></tr>
+            </tbody>
+        </table>
+
+        <h3>Souhrn za období</h3>
+        <p>Klikněte na "Spočítat souhrn" pro zobrazení celkových údajů.</p>
+        <div class="form-row">
+            <button id="calculateSummaryBtn">Spočítat souhrn</button>
+        </div>
+        
+        <table id="summaryTable">
+            <thead>
+                <tr>
+                    <th>Celkem hod.</th>
+                    <th>Celkový výdělek Kč</th>
+                    <th>Celkem přijaté Kč</th>
+                    <th>Celkem přijaté €</th>
+                    <th>Celkem platby (Kč)</th>
+                    <th>Celkem výplata (Kč)</th>
+                    <th>Šéfovi (Kč)</th>
+                    <th>Čistý výdělek (Kč)</th>
+                    <th>Konečný zůstatek (Kč)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="9" class="no-data">Zatím žádný souhrn</td></tr>
+            </tbody>
+        </table>
+    </main>
+
+    <script>
+        (function(){
+            let period = localStorage.getItem('period') || '';
+            let entries = JSON.parse(localStorage.getItem('entries')||'[]'); 
+            // entries = [{id,employee,dateStr,arrival,departure,breakMin,wellnessMin,overtimeMin,origin,receivedCZK,receivedEUR,purpose,paymentsCZK,payoutCZK}]
+
+            const periodInput = document.getElementById('period');
+            const saveSettingsBtn = document.getElementById('saveSettingsBtn');
+            const settingsStatus = document.getElementById('settingsStatus');
+
+            const employeeSelect = document.getElementById('employeeSelect');
+            const entryDateInput = document.getElementById('entryDate');
+            const arrivalTimeInput = document.getElementById('arrivalTime');
+            const departureTimeInput = document.getElementById('departureTime');
+            const breakMinInput = document.getElementById('breakMin');
+            const wellnessMinInput = document.getElementById('wellnessMin');
+            const overtimeMinInput = document.getElementById('overtimeMin');
+            const originInput = document.getElementById('origin');
+            const receivedCZKInput = document.getElementById('receivedCZK');
+            const receivedEURInput = document.getElementById('receivedEUR');
+            const purposeInput = document.getElementById('purpose');
+            const paymentsCZKInput = document.getElementById('paymentsCZK');
+            const payoutCZKInput = document.getElementById('payoutCZK');
+            const addEntryBtn = document.getElementById('addEntryBtn');
+            const entryStatus = document.getElementById('entryStatus');
+
+            const filterFromInput = document.getElementById('filterFrom');
+            const filterToInput = document.getElementById('filterTo');
+            const filterBtn = document.getElementById('filterBtn');
+            const entriesTable = document.getElementById('entriesTable').querySelector('tbody');
+
+            const calculateSummaryBtn = document.getElementById('calculateSummaryBtn');
+            const summaryTable = document.getElementById('summaryTable').querySelector('tbody');
+
+            periodInput.value = period;
+            renderEntries();
+
+            saveSettingsBtn.addEventListener('click', () => {
+                period = periodInput.value.trim();
+                localStorage.setItem('period', period);
+                settingsStatus.textContent = 'Období uloženo.';
+                setTimeout(()=>settingsStatus.textContent='',2000);
+            });
+
+            addEntryBtn.addEventListener('click', () => {
+                const employee = employeeSelect.value;
+                const dateStr = entryDateInput.value.trim();
+                if(!dateStr) {
+                    entryStatus.textContent = 'Zadejte datum.';
+                    return;
+                }
+                const arrival = arrivalTimeInput.value.trim();
+                const departure = departureTimeInput.value.trim();
+                const breakMin = parseInt(breakMinInput.value)||0;
+                const wellnessMin = parseInt(wellnessMinInput.value)||0;
+                const overtimeMin = parseInt(overtimeMinInput.value)||0;
+                const origin = originInput.value.trim();
+                const receivedCZK = parseFloat(receivedCZKInput.value)||0;
+                const receivedEUR = parseFloat(receivedEURInput.value)||0;
+                const purpose = purposeInput.value.trim();
+                const paymentsCZK = parseFloat(paymentsCZKInput.value)||0;
+                const payoutCZK = parseFloat(payoutCZKInput.value)||0;
+
+                const id = generateId();
+                const entry = {id,employee,dateStr,arrival,departure,breakMin,wellnessMin,overtimeMin,origin,receivedCZK,receivedEUR,purpose,paymentsCZK,payoutCZK};
+                entries.push(entry);
+                saveData();
+
+                // Reset fields
+                entryDateInput.value='';
+                arrivalTimeInput.value='';
+                departureTimeInput.value='';
+                breakMinInput.value='0';
+                wellnessMinInput.value='0';
+                overtimeMinInput.value='0';
+                originInput.value='';
+                receivedCZKInput.value='0';
+                receivedEURInput.value='0';
+                purposeInput.value='';
+                paymentsCZKInput.value='0';
+                payoutCZKInput.value='0';
+
+                renderEntries(filterFromInput.value, filterToInput.value);
+                entryStatus.textContent = 'Záznam přidán.';
+                setTimeout(()=>entryStatus.textContent='',2000);
+            });
+
+            filterBtn.addEventListener('click', ()=> {
+                renderEntries(filterFromInput.value, filterToInput.value);
+            });
+
+            calculateSummaryBtn.addEventListener('click', () => {
+                calculateSummary(filterFromInput.value, filterToInput.value);
+            });
+
+            entriesTable.addEventListener('click', (e)=>{
+                if(e.target.classList.contains('removeEntryBtn')){
+                    const id = e.target.dataset.id;
+                    if(confirm('Opravdu smazat tento záznam?')){
+                        entries = entries.filter(en=>en.id!==id);
+                        saveData();
+                        renderEntries(filterFromInput.value, filterToInput.value);
+                    }
+                }
+            });
+
+            function saveData() {
+                localStorage.setItem('entries', JSON.stringify(entries));
+            }
+
+            function generateId() {
+                return Math.random().toString(36).substr(2,9);
+            }
+
+            function parseTime(tstr) {
+                if(!tstr) return null;
+                const parts = tstr.split(':');
+                if(parts.length!==2) return null;
+                const h = parseInt(parts[0]);
+                const m = parseInt(parts[1]);
+                if(isNaN(h)||isNaN(m)) return null;
+                return h*60+m;
+            }
+
+            function parseDate(dstr) {
+                if(!dstr) return null;
+                const parts = dstr.split('.');
+                if(parts.length!==3) return null;
+                const day = parseInt(parts[0]);
+                const month = parseInt(parts[1]);
+                const year = parseInt(parts[2]);
+                if(isNaN(day)||isNaN(month)||isNaN(year)) return null;
+                return new Date(year,month-1,day);
+            }
+
+            function dateInRange(dateStr, fromStr, toStr) {
+                const d = parseDate(dateStr);
+                if(!d) return false;
+                let fromD = parseDate(fromStr);
+                let toD = parseDate(toStr);
+                if(!fromD) fromD = new Date(-8640000000000000);
+                if(!toD) toD = new Date(8640000000000000);
+                return d>=fromD && d<=toD;
+            }
+
+            function getEmployeeRate(employee) {
+                if (employee==='Marty') return 400; // Marty = 400 Kč/h
+                if (employee==='Maru') return 275; // Maru = 275 Kč/h
+                return 0;
+            }
+
+            function getBossShare(employee, dailyEarnings) {
+                // Marty dává 50%, Maru 1/3
+                if(employee==='Marty') {
+                    return dailyEarnings * 0.5;
+                } else if (employee==='Maru') {
+                    return dailyEarnings * (1/3);
+                }
+                return 0;
+            }
+
+            function renderEntries(fromStr, toStr) {
+                let filtered = entries.filter(e=>dateInRange(e.dateStr, fromStr, toStr));
+                if(filtered.length===0){
+                    entriesTable.innerHTML=`<tr><td colspan="16" class="no-data">Žádné záznamy</td></tr>`;
+                    return;
+                }
+                filtered.sort((a,b)=>{
+                    const da = parseDate(a.dateStr);
+                    const db = parseDate(b.dateStr);
+                    return da - db;
+                });
+                entriesTable.innerHTML = filtered.map(e=>{
+                    const arrMin = parseTime(e.arrival);
+                    const depMin = parseTime(e.departure);
+                    let workMin = 0;
+                    if (arrMin !== null && depMin !== null && depMin > arrMin) {
+                        // Prac. doba = (dep - arr - pauza) + wellness + více-práce
+                        workMin = (depMin - arrMin - e.breakMin) + e.wellnessMin + e.overtimeMin;
+                        if (workMin < 0) workMin = 0;
+                    }
+                    const workHours = workMin/60;
+                    const rate = getEmployeeRate(e.employee);
+                    const dailyEarnings = Math.round(workHours*rate*100)/100;
+
+                    return `<tr>
+                        <td>${e.employee}</td>
+                        <td>${e.dateStr}</td>
+                        <td>${e.arrival||''}</td>
+                        <td>${e.departure||''}</td>
+                        <td>${e.breakMin} min</td>
+                        <td>${e.wellnessMin} min</td>
+                        <td>${e.overtimeMin} min</td>
+                        <td>${workHours>0? (Math.floor(workHours)+'h '+Math.round((workHours%1)*60)+'m'): '0h'} </td>
+                        <td>${dailyEarnings>0? dailyEarnings+' Kč' : '0 Kč'}</td>
+                        <td>${e.origin||''}</td>
+                        <td>${e.receivedCZK>0?e.receivedCZK+' Kč':'0 Kč'}</td>
+                        <td>${e.receivedEUR>0?e.receivedEUR+' €':'0 €'}</td>
+                        <td>${e.purpose||''}</td>
+                        <td>${e.paymentsCZK>0?e.paymentsCZK+' Kč':'0 Kč'}</td>
+                        <td>${e.payoutCZK>0?e.payoutCZK+' Kč':'0 Kč'}</td>
+                        <td><button class="removeEntryBtn" data-id="${e.id}">Smazat</button></td>
+                    </tr>`;
+                }).join('');
+            }
+
+            function calculateSummary(fromStr, toStr) {
+                let filtered = entries.filter(e=>dateInRange(e.dateStr, fromStr, toStr));
+                if(filtered.length===0){
+                    summaryTable.innerHTML=`<tr><td colspan="9" class="no-data">Žádné záznamy v daném období</td></tr>`;
+                    return;
+                }
+
+                let totalMinutes=0, totalCZK=0, totalReceivedCZK=0, totalReceivedEUR=0, totalPaymentsCZK=0, totalPayoutCZK=0;
+                let totalBoss = 0; // kolik celkem šéfovi
+                for(let e of filtered){
+                    const arrMin = parseTime(e.arrival);
+                    const depMin = parseTime(e.departure);
+                    let workMin = 0;
+                    if(arrMin!==null && depMin!==null && depMin>arrMin){
+                        workMin = (depMin - arrMin - e.breakMin) + e.wellnessMin + e.overtimeMin;
+                        if(workMin<0)workMin=0;
+                    }
+                    totalMinutes+=workMin;
+
+                    const rate = getEmployeeRate(e.employee);
+                    const dailyEarnings = (workMin/60)*rate;
+                    totalCZK+=dailyEarnings;
+                    
+                    totalBoss += getBossShare(e.employee, dailyEarnings);
+
+                    totalReceivedCZK += e.receivedCZK;
+                    totalReceivedEUR += e.receivedEUR;
+                    totalPaymentsCZK += e.paymentsCZK;
+                    totalPayoutCZK += e.payoutCZK;
+                }
+
+                const totalHours = totalMinutes/60;
+                const netEarnings = totalCZK - totalBoss; // čistý výdělek po splátce dluhu šéfovi
+
+                // Konečný zůstatek = přijaté Kč - platby - výplata - čistý výdělek
+                const finalBalance = totalReceivedCZK - totalPaymentsCZK - totalPayoutCZK - netEarnings;
+
+                summaryTable.innerHTML = `<tr class="totals">
+                    <td>${Math.round(totalHours*100)/100} h</td>
+                    <td>${Math.round(totalCZK)} Kč</td>
+                    <td>${Math.round(totalReceivedCZK)} Kč</td>
+                    <td>${Math.round(totalReceivedEUR)} €</td>
+                    <td>${Math.round(totalPaymentsCZK)} Kč</td>
+                    <td>${Math.round(totalPayoutCZK)} Kč</td>
+                    <td>${Math.round(totalBoss)} Kč</td>
+                    <td>${Math.round(netEarnings)} Kč</td>
+                    <td>${Math.round(finalBalance)} Kč</td>
+                </tr>`;
+            }
+        })();
+    </script>
+</body>
+</html>
