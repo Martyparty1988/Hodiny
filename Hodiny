@@ -1,21 +1,3 @@
-Chcete-li vytvořit webovou aplikaci pro pracovní docházku a využít co nejvíce z tohoto kódu, zde je plán:
-
-Klíčové kroky:
-	1.	Struktura aplikace:
-	•	Využijeme HTML strukturu z poskytnutého kódu jako základ.
-	•	Upravené části budou reflektovat vaše požadavky (např. pracovní docházka, zadání času, přestávky, export dat).
-	2.	Funkcionality pro docházku:
-	•	Přidáme možnost zadávání pracovní docházky s datem, časem začátku a konce, a přestávkami.
-	•	Umožníme ukládání dat do místního úložiště nebo jejich export.
-	3.	Vzhled a design:
-	•	Zachováme stávající moderní styl (CSS soubory z kódu), ale přizpůsobíme ho podle potřeby (např. vaše preference barev).
-	4.	Optimalizace pro mobilní zařízení:
-	•	Upravíme rozvržení, aby aplikace byla plně responzivní na iPhone.
-
-Ukázka upraveného kódu
-
-Níže je základní příklad, jak by aplikace mohla vypadat:
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,17 +79,3 @@ Níže je základní příklad, jak by aplikace mohla vypadat:
     </script>
 </body>
 </html>
-
-Co tento kód dělá:
-	1.	HTML struktura:
-	•	Používá části kódu z DeskTime (vzhled a stylování).
-	•	Přidává formulář pro zadání docházky.
-	2.	Interaktivita pomocí JavaScriptu:
-	•	Ukládá a zobrazuje záznamy docházky.
-	•	Počítá celkový odpracovaný čas (včetně přestávky).
-	3.	Moderní vzhled:
-	•	Využívá CSS stylů z poskytnutého kódu.
-	4.	Flexibilita:
-	•	Data lze snadno rozšířit o export do formátu CSV nebo ukládání do místního úložiště.
-
-Pokud byste chtěli více přizpůsobení nebo přidání specifických funkcí, dejte vědět!
