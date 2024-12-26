@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pracovní docházka</title>
+    <link rel="stylesheet" href="https://desktime.com/build/assets/public-styles-BCrR0CUS.css">
+</head>
+<body class="index new">
+    <header class="public-header">
+        <h1 class="dt-typography-h2">Pracovní docházka</h1>
+    </header>
+
+    <main class="content-wrapper-public">
+        <section id="attendance">
+            <h2 class="dt-typography-h3">Záznam docházky</h2>
+            <form id="attendance-form">
+                <label for="date">Datum:</label>
+                <input type="date" id="date" name="date" required>
+
+                <label for="start-time">Začátek:</label>
+                <input type="time" id="start-time" name="start-time" required>
+
+                <label for="end-time">Konec:</label>
+                <input type="time" id="end-time" name="end-time" required>
+
+                <label for="break">Délka přestávky (v minutách):</label>
+                <input type="number" id="break" name="break" min="0" required>
+
+                <button type="submit" class="btn btn-primary">Uložit</button>
+            </form>
+        </section>
+
+        <section id="attendance-table">
+            <h2 class="dt-typography-h3">Záznamy</h2>
+            <table id="records-table">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Začátek</th>
+                        <th>Konec</th>
+                        <th>Přestávka</th>
+                        <th>Celkový čas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data budou dynamicky přidána -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        document.getElementById('attendance-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            // Získání hodnot z formuláře
+            const date = document.getElementById('date').value;
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
+            const breakTime = document.getElementById('break').value;
+
+            // Výpočet celkového času
+            const start = new Date(`1970-01-01T${startTime}Z`);
+            const end = new Date(`1970-01-01T${endTime}Z`);
+            const totalMinutes = (end - start) / (1000 * 60) - breakTime;
+
+            // Přidání řádku do tabulky
+            const table = document.getElementById('records-table').querySelector('tbody');
+            const row = table.insertRow();
+            row.innerHTML = `
+                <td>${date}</td>
+                <td>${startTime}</td>
+                <td>${endTime}</td>
+                <td>${breakTime} min</td>
+                <td>${totalMinutes} min</td>
+            `;
+        });
+    </script>
+</body>
+</html>
