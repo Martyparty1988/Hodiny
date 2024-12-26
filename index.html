@@ -1,39 +1,81 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pracovní docházka</title>
+    <!-- Použití stylů z originálního kódu -->
     <link rel="stylesheet" href="https://desktime.com/build/assets/public-styles-BCrR0CUS.css">
+    <style>
+        body {
+            background-color: #f4f9fe;
+            padding: 20px;
+        }
+        .content-wrapper-public {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table th, table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        table th {
+            background-color: #6cb123;
+            color: white;
+        }
+        .btn-primary {
+            background-color: #6cb123;
+            border: none;
+        }
+    </style>
 </head>
 <body class="index new">
     <header class="public-header">
-        <h1 class="dt-typography-h2">Pracovní docházka</h1>
+        <nav class="navbar navbar-expand-xl main-topbar">
+            <div class="container-xl">
+                <a class="navbar-brand" href="#">
+                    <img width="100" height="100" src="/static/logo/logo-dark-without-padding.svg" alt="Logo">
+                </a>
+                <h1 class="dt-typography-h2">Pracovní docházka</h1>
+            </div>
+        </nav>
     </header>
 
     <main class="content-wrapper-public">
-        <section id="attendance">
-            <h2 class="dt-typography-h3">Záznam docházky</h2>
-            <form id="attendance-form">
-                <label for="date">Datum:</label>
-                <input type="date" id="date" name="date" required>
-
-                <label for="start-time">Začátek:</label>
-                <input type="time" id="start-time" name="start-time" required>
-
-                <label for="end-time">Konec:</label>
-                <input type="time" id="end-time" name="end-time" required>
-
-                <label for="break">Délka přestávky (v minutách):</label>
-                <input type="number" id="break" name="break" min="0" required>
-
-                <button type="submit" class="btn btn-primary">Uložit</button>
+        <!-- Formulář pro zadávání záznamů -->
+        <section>
+            <h2 class="dt-typography-h3">Přidat záznam docházky</h2>
+            <form id="attendance-form" class="form-signup">
+                <div>
+                    <label for="date">Datum:</label>
+                    <input type="date" id="date" class="form-control" name="date" required>
+                </div>
+                <div>
+                    <label for="start-time">Začátek:</label>
+                    <input type="time" id="start-time" class="form-control" name="start-time" required>
+                </div>
+                <div>
+                    <label for="end-time">Konec:</label>
+                    <input type="time" id="end-time" class="form-control" name="end-time" required>
+                </div>
+                <div>
+                    <label for="break">Délka přestávky (minuty):</label>
+                    <input type="number" id="break" class="form-control" name="break" min="0" value="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Uložit záznam</button>
             </form>
         </section>
 
-        <section id="attendance-table">
-            <h2 class="dt-typography-h3">Záznamy</h2>
-            <table id="records-table">
+        <!-- Tabulka se záznamy -->
+        <section>
+            <h2 class="dt-typography-h3">Seznam docházky</h2>
+            <table id="attendance-table">
                 <thead>
                     <tr>
                         <th>Datum</th>
@@ -44,30 +86,39 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- Data budou dynamicky přidána -->
+                    <!-- Data budou přidána dynamicky -->
                 </tbody>
             </table>
         </section>
+
+        <!-- Tlačítko pro export -->
+        <button id="export-button" class="btn btn-primary">Exportovat do CSV</button>
     </main>
 
     <script>
-        document.getElementById('attendance-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            
-            // Získání hodnot z formuláře
+        const form = document.getElementById('attendance-form');
+        const tableBody = document.getElementById('attendance-table').querySelector('tbody');
+        const exportButton = document.getElementById('export-button');
+
+        const records = [];
+
+        // Funkce na přidání záznamu do tabulky
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
             const date = document.getElementById('date').value;
             const startTime = document.getElementById('start-time').value;
             const endTime = document.getElementById('end-time').value;
-            const breakTime = document.getElementById('break').value;
+            const breakTime = parseInt(document.getElementById('break').value, 10);
 
-            // Výpočet celkového času
-            const start = new Date(`1970-01-01T${startTime}Z`);
-            const end = new Date(`1970-01-01T${endTime}Z`);
+            const start = new Date(`1970-01-01T${startTime}`);
+            const end = new Date(`1970-01-01T${endTime}`);
             const totalMinutes = (end - start) / (1000 * 60) - breakTime;
 
-            // Přidání řádku do tabulky
-            const table = document.getElementById('records-table').querySelector('tbody');
-            const row = table.insertRow();
+            const record = { date, startTime, endTime, breakTime, totalMinutes };
+            records.push(record);
+
+            const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${date}</td>
                 <td>${startTime}</td>
@@ -75,6 +126,25 @@
                 <td>${breakTime} min</td>
                 <td>${totalMinutes} min</td>
             `;
+            tableBody.appendChild(row);
+
+            form.reset();
+        });
+
+        // Funkce pro export dat do CSV
+        exportButton.addEventListener('click', function() {
+            const csvContent = "data:text/csv;charset=utf-8," +
+                ["Datum,Začátek,Konec,Přestávka,Celkový čas"]
+                .concat(records.map(r => `${r.date},${r.startTime},${r.endTime},${r.breakTime},${r.totalMinutes}`))
+                .join("\n");
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'dochazka.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         });
     </script>
 </body>
