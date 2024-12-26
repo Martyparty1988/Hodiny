@@ -1,232 +1,113 @@
+Chcete-li vytvořit webovou aplikaci pro pracovní docházku a využít co nejvíce z tohoto kódu, zde je plán:
+
+Klíčové kroky:
+	1.	Struktura aplikace:
+	•	Využijeme HTML strukturu z poskytnutého kódu jako základ.
+	•	Upravené části budou reflektovat vaše požadavky (např. pracovní docházka, zadání času, přestávky, export dat).
+	2.	Funkcionality pro docházku:
+	•	Přidáme možnost zadávání pracovní docházky s datem, časem začátku a konce, a přestávkami.
+	•	Umožníme ukládání dat do místního úložiště nebo jejich export.
+	3.	Vzhled a design:
+	•	Zachováme stávající moderní styl (CSS soubory z kódu), ale přizpůsobíme ho podle potřeby (např. vaše preference barev).
+	4.	Optimalizace pro mobilní zařízení:
+	•	Upravíme rozvržení, aby aplikace byla plně responzivní na iPhone.
+
+Ukázka upraveného kódu
+
+Níže je základní příklad, jak by aplikace mohla vypadat:
+
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Docházka a Vyúčtování</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f8f9fa;
-            color: #333;
-        }
-
-        header {
-            text-align: center;
-            padding: 1rem;
-            background-color: #007bff;
-            color: #fff;
-        }
-
-        nav {
-            display: flex;
-            justify-content: center;
-            background-color: #0056b3;
-        }
-
-        nav .tab-btn {
-            padding: 0.5rem 1rem;
-            background: none;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        nav .tab-btn.active {
-            background-color: #fff;
-            color: #007bff;
-        }
-
-        main {
-            padding: 1rem;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-right: 1rem;
-        }
-
-        button:disabled {
-            background-color: #ccc;
-            cursor: not-allowed;
-        }
-
-        button:hover:enabled {
-            background-color: #0056b3;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-        }
-
-        table th, table td {
-            border: 1px solid #ddd;
-            padding: 0.5rem;
-            text-align: left;
-        }
-
-        table th {
-            background-color: #007bff;
-            color: white;
-        }
-    </style>
+    <title>Pracovní docházka</title>
+    <link rel="stylesheet" href="https://desktime.com/build/assets/public-styles-BCrR0CUS.css">
 </head>
-<body>
-<header>
-    <h1>Docházka a Vyúčtování</h1>
-    <nav>
-        <button class="tab-btn active" data-tab="workSection">Pracovní doba</button>
-        <button class="tab-btn" data-tab="summarySection">Vyúčtování</button>
-    </nav>
-</header>
-<main>
-    <!-- Pracovní doba -->
-    <section id="workSection" class="tab-content active">
-        <h2>Pracovní doba</h2>
-        <button id="selectPerson">Vybrat osobu (Márty/Maru)</button>
-        <button id="addWorkRecord" disabled>Přidat záznam</button>
-        <p id="selectedPerson">Vybraná osoba: Nikdo</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Osoba</th>
-                    <th>Datum</th>
-                    <th>Příchod</th>
-                    <th>Odchod</th>
-                    <th>Pauza (h)</th>
-                    <th>Prac. doba</th>
-                </tr>
-            </thead>
-            <tbody id="workTableBody"></tbody>
-        </table>
-    </section>
+<body class="index new">
+    <header class="public-header">
+        <h1 class="dt-typography-h2">Pracovní docházka</h1>
+    </header>
 
-    <!-- Vyúčtování -->
-    <section id="summarySection" class="tab-content">
-        <h2>Vyúčtování</h2>
-        <button id="addTransaction">Přidat transakci</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>Datum</th>
-                    <th>Typ</th>
-                    <th>Částka</th>
-                    <th>Popis</th>
-                </tr>
-            </thead>
-            <tbody id="summaryTableBody"></tbody>
-        </table>
-    </section>
-</main>
-<script>
-    let selectedPerson = null;
-    const workData = [];
-    const summaryData = [];
+    <main class="content-wrapper-public">
+        <section id="attendance">
+            <h2 class="dt-typography-h3">Záznam docházky</h2>
+            <form id="attendance-form">
+                <label for="date">Datum:</label>
+                <input type="date" id="date" name="date" required>
 
-    // Přepínání mezi kartami
-    document.querySelectorAll(".tab-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".tab-content").forEach(tab => tab.classList.remove("active"));
-            document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
-            document.getElementById(btn.dataset.tab).classList.add("active");
-            btn.classList.add("active");
+                <label for="start-time">Začátek:</label>
+                <input type="time" id="start-time" name="start-time" required>
+
+                <label for="end-time">Konec:</label>
+                <input type="time" id="end-time" name="end-time" required>
+
+                <label for="break">Délka přestávky (v minutách):</label>
+                <input type="number" id="break" name="break" min="0" required>
+
+                <button type="submit" class="btn btn-primary">Uložit</button>
+            </form>
+        </section>
+
+        <section id="attendance-table">
+            <h2 class="dt-typography-h3">Záznamy</h2>
+            <table id="records-table">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Začátek</th>
+                        <th>Konec</th>
+                        <th>Přestávka</th>
+                        <th>Celkový čas</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data budou dynamicky přidána -->
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        document.getElementById('attendance-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            
+            // Získání hodnot z formuláře
+            const date = document.getElementById('date').value;
+            const startTime = document.getElementById('start-time').value;
+            const endTime = document.getElementById('end-time').value;
+            const breakTime = document.getElementById('break').value;
+
+            // Výpočet celkového času
+            const start = new Date(`1970-01-01T${startTime}Z`);
+            const end = new Date(`1970-01-01T${endTime}Z`);
+            const totalMinutes = (end - start) / (1000 * 60) - breakTime;
+
+            // Přidání řádku do tabulky
+            const table = document.getElementById('records-table').querySelector('tbody');
+            const row = table.insertRow();
+            row.innerHTML = `
+                <td>${date}</td>
+                <td>${startTime}</td>
+                <td>${endTime}</td>
+                <td>${breakTime} min</td>
+                <td>${totalMinutes} min</td>
+            `;
         });
-    });
-
-    // Výběr osoby (Márty nebo Maru)
-    document.getElementById("selectPerson").addEventListener("click", () => {
-        const person = prompt("Vyberte osobu: Márty nebo Maru?");
-        if (person !== "Márty" && person !== "Maru") {
-            alert("Neplatný výběr! Zadejte Márty nebo Maru.");
-            return;
-        }
-        selectedPerson = person;
-        document.getElementById("selectedPerson").textContent = `Vybraná osoba: ${person}`;
-        document.getElementById("addWorkRecord").disabled = false;
-    });
-
-    // Přidání pracovního záznamu
-    document.getElementById("addWorkRecord").addEventListener("click", () => {
-        if (!selectedPerson) {
-            alert("Nejprve vyberte osobu!");
-            return;
-        }
-
-        const date = new Date().toISOString().split("T")[0]; // Aktuální datum
-        const arrival = prompt("Zadejte čas příchodu (HH:MM):");
-        const departure = prompt("Zadejte čas odchodu (HH:MM):");
-        const pause = parseFloat(prompt("Zadejte délku pauzy (v hodinách):")) || 0;
-
-        if (!arrival || !departure) {
-            alert("Příchod a odchod jsou povinné!");
-            return;
-        }
-
-        const workHours = calculateWorkHours(arrival, departure, pause);
-        const entry = { person: selectedPerson, date, arrival, departure, pause, workHours };
-        workData.push(entry);
-        renderWorkTable();
-    });
-
-    // Výpočet pracovní doby
-    function calculateWorkHours(arrival, departure, pause) {
-        const [arrH, arrM] = arrival.split(":").map(Number);
-        const [depH, depM] = departure.split(":").map(Number);
-        const totalMinutes = (depH * 60 + depM) - (arrH * 60 + arrM) - (pause * 60);
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        return `${hours}h ${minutes}m`;
-    }
-
-    // Zobrazení tabulky Pracovní doba
-    function renderWorkTable() {
-        const tableBody = document.getElementById("workTableBody");
-        tableBody.innerHTML = workData
-            .map(row => `<tr>${Object.values(row).map(val => `<td>${val}</td>`).join("")}</tr>`)
-            .join("");
-    }
-
-    // Přidání transakce
-    document.getElementById("addTransaction").addEventListener("click", () => {
-        const type = prompt("Zadejte typ transakce (Přijato CZK, Přijato EUR, Platba CZK, Platba EUR):");
-        const amount = parseFloat(prompt("Zadejte částku:")) || 0;
-        const description = prompt("Popis transakce (např. výplata, nákup):");
-        const date = new Date().toISOString().split("T")[0]; // Aktuální datum
-
-        if (!type || !amount || !description) {
-            alert("Všechna pole jsou povinná!");
-            return;
-        }
-
-        const entry = { date, type, amount, description };
-        summaryData.push(entry);
-        renderSummaryTable();
-    });
-
-    // Zobrazení tabulky Vyúčtování
-    function renderSummaryTable() {
-        const tableBody = document.getElementById("summaryTableBody");
-        tableBody.innerHTML = summaryData
-            .map(row => `<tr>${Object.values(row).map(val => `<td>${val}</td>`).join("")}</tr>`)
-            .join("");
-    }
-</script>
+    </script>
 </body>
 </html>
+
+Co tento kód dělá:
+	1.	HTML struktura:
+	•	Používá části kódu z DeskTime (vzhled a stylování).
+	•	Přidává formulář pro zadání docházky.
+	2.	Interaktivita pomocí JavaScriptu:
+	•	Ukládá a zobrazuje záznamy docházky.
+	•	Počítá celkový odpracovaný čas (včetně přestávky).
+	3.	Moderní vzhled:
+	•	Využívá CSS stylů z poskytnutého kódu.
+	4.	Flexibilita:
+	•	Data lze snadno rozšířit o export do formátu CSV nebo ukládání do místního úložiště.
+
+Pokud byste chtěli více přizpůsobení nebo přidání specifických funkcí, dejte vědět!
