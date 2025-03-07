@@ -1,0 +1,205 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: #f5f5f5;
+    font-size: 16px;
+}
+
+header {
+    background: #333;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+}
+
+main {
+    max-width: 1200px;
+    margin: 2rem auto;
+    background: #fff;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3 {
+    margin-top: 0;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.form-row label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 600;
+}
+
+input, select, button {
+    padding: 0.4rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    background: #007aff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0057c2;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1rem;
+}
+
+table th, table td {
+    border-bottom: 1px solid #ddd;
+    padding: 0.4rem;
+    text-align: left;
+}
+
+table th {
+    background: #eee;
+}
+
+.no-data {
+    text-align: center;
+    color: #999;
+}
+
+.totals {
+    font-weight: bold;
+    background: #e1f5fe;
+}
+
+.status {
+    margin: 1rem 0;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.controls {
+    margin-bottom: 1.5rem;
+}
+
+/* Responzivní úpravy */
+@media (max-width: 1024px) {
+    main {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+    .form-row {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .form-row label {
+        width: 100%;
+    }
+    input, select, button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    table {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+    main {
+        margin: 0.5rem;
+        padding: 1rem;
+    }
+    .form-row label {
+        font-size: 0.9rem;
+    }
+    table th, table td {
+        padding: 0.3rem;
+        font-size: 0.8rem;
+    }
+    button {
+        padding: 0.4rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+    header {
+        padding: 0.5rem;
+    }
+    main {
+        margin: 0;
+        padding: 0.5rem;
+    }
+    .form-row {
+        gap: 0.3rem;
+    }
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    table th, table td {
+        min-width: 100px;
+    }
+    .no-data {
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 400px) {
+    table {
+        display: block;
+    }
+    table thead {
+        display: none;
+    }
+    table tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #ddd;
+        padding: 0.5rem;
+    }
+    table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.2rem 0;
+        font-size: 0.85rem;
+    }
+    table td::before {
+        content: attr(data-label);
+        font-weight: bold;
+        margin-right: 1rem;
+    }
+    table td:nth-child(1)::before { content: "Zaměstnanec:"; }
+    table td:nth-child(2)::before { content: "Datum:"; }
+    table td:nth-child(3)::before { content: "Příchod:"; }
+    table td:nth-child(4)::before { content: "Odchod:"; }
+    table td:nth-child(5)::before { content: "Pauza:"; }
+    table td:nth-child(6)::before { content: "Wellness:"; }
+    table td:nth-child(7)::before { content: "Více-práce:"; }
+    table td:nth-child(8)::before { content: "Prac. doba:"; }
+    table td:nth-child(9)::before { content: "Den. výdělek:"; }
+    table td:nth-child(10)::before { content: "Původ:"; }
+    table td:nth-child(11)::before { content: "Přijato Kč:"; }
+    table td:nth-child(12)::before { content: "Přijato €:"; }
+    table td:nth-child(13)::before { content: "Účel:"; }
+    table td:nth-child(14)::before { content: "Platby (Kč):"; }
+    table td:nth-child(15)::before { content: "Výplata (Kč):"; }
+    table td:nth-child(16)::before { content: "Akce:"; }
+}
