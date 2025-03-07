@@ -1,250 +1,140 @@
 <!DOCTYPE html>
 <html lang="cs">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Správa zaměstnanců a docházky</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f9fe;
-            padding: 20px;
-            margin: 0;
-        }
-        .content-wrapper {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        form, section {
-            margin: 20px 0;
-        }
-        .btn {
-            background-color: #6cb123;
-            color: white;
-            padding: 10px;
-            border: none;
-            cursor: pointer;
-            margin: 5px;
-        }
-        .btn:hover {
-            background-color: #5aa018;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        table th, table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-        }
-        table th {
-            background-color: #6cb123;
-            color: white;
-        }
-        canvas {
-            margin: 20px auto;
-            display: block;
-            max-width: 100%;
-        }
-        .chart-section {
-            margin: 40px 0;
-        }
-    </style>
+    <title>Docházka a Vyúčtování (Marty & Maru)</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <header>
-        <h1>Správa zaměstnanců a docházky</h1>
-    </header>
-    <main class="content-wrapper">
-        <!-- Uživatelské přihlášení -->
-        <section>
-            <h2>Přihlášení uživatele</h2>
-            <form id="login-form">
-                <label for="username">Uživatelské jméno:</label>
-                <input type="text" id="username" required>
-                <label for="password">Heslo:</label>
-                <input type="password" id="password" required>
-                <button type="submit" class="btn">Přihlásit</button>
-            </form>
-        </section>
+    <header><h1>Docházka a Vyúčtování</h1></header>
+    <main>
+        <div class="controls">
+            <h2>Nastavení období</h2>
+            <div class="form-row">
+                <label>Období (např. 12/2024): 
+                    <input type="text" id="period" placeholder="např. 12/2024" value="">
+                </label>
+                <button id="saveSettingsBtn">Uložit období</button>
+            </div>
+            <div class="status" id="settingsStatus"></div>
+        </div>
 
-        <!-- Výběr zaměstnance -->
-        <section id="employee-section" style="display: none;">
-            <h2>Vyberte zaměstnance</h2>
-            <select id="employee-select">
-                <option value="Márty">Márty (400 Kč/h)</option>
-                <option value="Maruška">Maruška (275 Kč/h)</option>
-            </select>
-        </section>
+        <h2>Záznamy</h2>
+        <p>Zadejte pro každý den: zaměstnance, datum, časy, minuty.  
+        Wellness a Více-práce se přičítají, pauza se odečítá.  
+        Z výdělku se platí šéfovi (Marty 50%, Maru 1/3), zbyde čistý výdělek.  
+        Čistý výdělek se pak odečte od přijatých Kč spolu s platbami a výplatou.</p>
+        
+        <div class="form-row">
+            <label>Zaměstnanec:
+                <select id="employeeSelect">
+                    <option value="Marty">Marty</option>
+                    <option value="Maru">Maru</option>
+                </select>
+            </label>
+            <label>Datum (dd.mm.rrrr):
+                <input type="text" id="entryDate" placeholder="např. 10.12.2024">
+            </label>
+            <label>Příchod (hh:mm):
+                <input type="text" id="arrivalTime" placeholder="11:00">
+            </label>
+            <label>Odchod (hh:mm):
+                <input type="text" id="departureTime" placeholder="15:30">
+            </label>
+        </div>
+        <div class="form-row">
+            <label>Pauza (min):
+                <input type="number" id="breakMin" value="0">
+            </label>
+            <label>Wellness (min):
+                <input type="number" id="wellnessMin" value="0">
+            </label>
+            <label>Více-práce (min):
+                <input type="number" id="overtimeMin" value="0">
+            </label>
+            <label>Původ:
+                <input type="text" id="origin" placeholder="Např. David">
+            </label>
+        </div>
+        <div class="form-row">
+            <label>Přijato Kč:
+                <input type="number" id="receivedCZK" value="0">
+            </label>
+            <label>Přijato EUR:
+                <input type="number" id="receivedEUR" value="0">
+            </label>
+            <label>Účel:
+                <input type="text" id="purpose" placeholder="Např. Železářství">
+            </label>
+            <label>Platby (Kč):
+                <input type="number" id="paymentsCZK" value="0">
+            </label>
+            <label>Výplata (Kč):
+                <input type="number" id="payoutCZK" value="0">
+            </label>
+            <button id="addEntryBtn">Přidat záznam</button>
+        </div>
+        <div class="status" id="entryStatus"></div>
 
-        <!-- Docházka -->
-        <section id="attendance-section" style="display: none;">
-            <h2>Přidat záznam docházky</h2>
-            <form id="attendance-form">
-                <label for="date">Datum:</label>
-                <input type="date" id="date" required>
-                <label for="start-time">Začátek:</label>
-                <input type="time" id="start-time" required>
-                <label for="end-time">Konec:</label>
-                <input type="time" id="end-time" required>
-                <label for="break">Přestávka (minuty):</label>
-                <input type="number" id="break" min="0" value="0" required>
-                <button type="submit" class="btn">Uložit záznam</button>
-            </form>
-        </section>
+        <h3>Přehled záznamů</h3>
+        <div class="form-row">
+            <label>Filtrovat od (dd.mm.rrrr):
+                <input type="text" id="filterFrom" placeholder="1.12.2024">
+            </label>
+            <label>Do (dd.mm.rrrr):
+                <input type="text" id="filterTo" placeholder="31.12.2024">
+            </label>
+            <button id="filterBtn">Filtrovat</button>
+        </div>
+        
+        <table id="entriesTable">
+            <thead>
+                <tr>
+                    <th>Zaměstnanec</th>
+                    <th>Datum</th>
+                    <th>Příchod</th>
+                    <th>Odchod</th>
+                    <th>Pauza</th>
+                    <th>Wellness</th>
+                    <th>Více-práce</th>
+                    <th>Prac. doba</th>
+                    <th>Den. výdělek</th>
+                    <th>Původ</th>
+                    <th>Přijato Kč</th>
+                    <th>Přijato €</th>
+                    <th>Účel</th>
+                    <th>Platby (Kč)</th>
+                    <th>Výplata (Kč)</th>
+                    <th>Akce</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
 
-        <!-- Tabulka docházky -->
-        <section id="records-section" style="display: none;">
-            <h2>Tabulka docházky</h2>
-            <table id="attendance-table">
-                <thead>
-                    <tr>
-                        <th>Zaměstnanec</th>
-                        <th>Datum</th>
-                        <th>Začátek</th>
-                        <th>Konec</th>
-                        <th>Přestávka</th>
-                        <th>Celkový čas (hodiny)</th>
-                        <th>Mzda (Kč)</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </section>
-
-        <!-- Statistiky a analýza -->
-        <section class="chart-section" id="charts-section" style="display: none;">
-            <h2>Analýza výkonu zaměstnanců</h2>
-            <canvas id="hours-chart"></canvas>
-            <canvas id="break-ratio-chart"></canvas>
-        </section>
+        <h3>Souhrn za období</h3>
+        <p>Klikněte na "Spočítat souhrn" pro zobrazení celkových údajů.</p>
+        <div class="form-row">
+            <button id="calculateSummaryBtn">Spočítat souhrn</button>
+        </div>
+        
+        <table id="summaryTable">
+            <thead>
+                <tr>
+                    <th>Celkem hod.</th>
+                    <th>Celkový výdělek Kč</th>
+                    <th>Celkem přijaté Kč</th>
+                    <th>Celkem přijaté €</th>
+                    <th>Celkem platby (Kč)</th>
+                    <th>Celkem výplata (Kč)</th>
+                    <th>Šéfovi (Kč)</th>
+                    <th>Čistý výdělek (Kč)</th>
+                    <th>Konečný zůstatek (Kč)</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
     </main>
-
-    <script>
-        // Základní data
-        const employees = {
-            Márty: { hourlyRate: 400 },
-            Maruška: { hourlyRate: 275 },
-        };
-
-        const records = JSON.parse(localStorage.getItem('attendanceRecords')) || [];
-
-        // Přihlášení uživatele
-        document.getElementById('login-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            if (username && password) {
-                alert(`Přihlášen uživatel: ${username}`);
-                document.getElementById('login-form').style.display = 'none';
-                document.getElementById('employee-section').style.display = 'block';
-                document.getElementById('attendance-section').style.display = 'block';
-                document.getElementById('records-section').style.display = 'block';
-                document.getElementById('charts-section').style.display = 'block';
-                loadRecords();
-                generateCharts();
-            } else {
-                alert('Neplatné přihlášení');
-            }
-        });
-
-        // Přidání docházky
-        document.getElementById('attendance-form').addEventListener('submit', function (e) {
-            e.preventDefault();
-
-            const employee = document.getElementById('employee-select').value;
-            const date = document.getElementById('date').value;
-            const startTime = document.getElementById('start-time').value;
-            const endTime = document.getElementById('end-time').value;
-            const breakMinutes = parseInt(document.getElementById('break').value, 10);
-
-            const totalMinutes = (new Date(`1970-01-01T${endTime}`) - new Date(`1970-01-01T${startTime}`)) / 60000 - breakMinutes;
-            const totalHours = totalMinutes / 60;
-            const wage = totalHours * employees[employee].hourlyRate;
-
-            const record = { employee, date, startTime, endTime, breakMinutes, totalHours, wage };
-            records.push(record);
-            localStorage.setItem('attendanceRecords', JSON.stringify(records));
-            addRecordToTable(record);
-            generateCharts();
-        });
-
-        // Přidání záznamu do tabulky
-        function addRecordToTable(record) {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${record.employee}</td>
-                <td>${record.date}</td>
-                <td>${record.startTime}</td>
-                <td>${record.endTime}</td>
-                <td>${record.breakMinutes} min</td>
-                <td>${record.totalHours.toFixed(2)} h</td>
-                <td>${record.wage.toFixed(2)} Kč</td>
-            `;
-            document.getElementById('attendance-table').querySelector('tbody').appendChild(row);
-        }
-
-        // Načtení záznamů
-        function loadRecords() {
-            records.forEach(record => addRecordToTable(record));
-        }
-
-        // Generování grafů
-        function generateCharts() {
-            const totals = calculateTotals();
-
-            // Hodinový graf
-            new Chart(document.getElementById('hours-chart'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(totals),
-                    datasets: [{
-                        label: 'Odpracované hodiny',
-                        data: Object.values(totals).map(t => t.totalHours),
-                        backgroundColor: ['#6cb123', '#f39c12'],
-                    }]
-                }
-            });
-
-            // Poměr práce vs. přestávky
-            new Chart(document.getElementById('break-ratio-chart'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(totals),
-                    datasets: [{
-                        label: 'Poměr přestávky',
-                        data: Object.values(totals).map(t => t.totalBreakRatio),
-                        backgroundColor: ['#3498db', '#e74c3c'],
-                    }]
-                }
-            });
-        }
-
-        // Výpočet statistik
-        function calculateTotals() {
-            const totals = {};
-            Object.keys(employees).forEach(employee => {
-                totals[employee] = {
-                    totalHours: 0,
-                    totalBreakRatio: 0
-                };
-            });
-
-            records.forEach(record => {
-                const employee = record.employee;
-                totals[employee].totalHours += record.totalHours;
-                totals[employee].totalBreakRatio += (record.breakMinutes / (record.totalHours * 60)) * 100;
-            });
-
-            return totals;
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
